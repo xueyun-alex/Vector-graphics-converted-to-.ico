@@ -1,0 +1,226 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "8065263",
+      "name": "test(1)",
+      "font_class": "test",
+      "unicode": "e611",
+      "unicode_decimal": 58897
+    },
+    {
+      "icon_id": "8065272",
+      "name": "setup",
+      "font_class": "setup",
+      "unicode": "e612",
+      "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "8065273",
+      "name": "print",
+      "font_class": "print",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "8065274",
+      "name": "lock",
+      "font_class": "lock",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "8065275",
+      "name": "draw",
+      "font_class": "draw",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "8065276",
+      "name": "test",
+      "font_class": "test1",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "8065278",
+      "name": "bank",
+      "font_class": "bank",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "8065279",
+      "name": "notebook(2)",
+      "font_class": "notebook",
+      "unicode": "e618",
+      "unicode_decimal": 58904
+    },
+    {
+      "icon_id": "8065280",
+      "name": "calendar(2)",
+      "font_class": "calendar",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "8065281",
+      "name": "notebook",
+      "font_class": "notebook1",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "8065282",
+      "name": "calendar",
+      "font_class": "calendar1",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "8065283",
+      "name": "bookmark",
+      "font_class": "bookmark",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "8065284",
+      "name": "checklist",
+      "font_class": "checklist",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "8065285",
+      "name": "edit-tools",
+      "font_class": "edit-tools",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "8065286",
+      "name": "calendar(1)",
+      "font_class": "calendar2",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "8065287",
+      "name": "monitor",
+      "font_class": "monitor",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "8065288",
+      "name": "notebook(1)",
+      "font_class": "notebook2",
+      "unicode": "e621",
+      "unicode_decimal": 58913
+    },
+    {
+      "icon_id": "8065290",
+      "name": "files-and-folders(1)",
+      "font_class": "files-and-folders",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "8065291",
+      "name": "conversation",
+      "font_class": "conversation",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "8065292",
+      "name": "folder",
+      "font_class": "folder",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "8065293",
+      "name": "file",
+      "font_class": "file",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "8065294",
+      "name": "files-and-folders",
+      "font_class": "files-and-folders1",
+      "unicode": "e626",
+      "unicode_decimal": 58918
+    },
+    {
+      "icon_id": "8065296",
+      "name": "search",
+      "font_class": "search",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
+      "icon_id": "8065297",
+      "name": "mails",
+      "font_class": "mails",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
+      "icon_id": "8065298",
+      "name": "telegram",
+      "font_class": "telegram",
+      "unicode": "e629",
+      "unicode_decimal": 58921
+    },
+    {
+      "icon_id": "8065299",
+      "name": "app",
+      "font_class": "app",
+      "unicode": "e62a",
+      "unicode_decimal": 58922
+    },
+    {
+      "icon_id": "8065300",
+      "name": "paper-plane",
+      "font_class": "paper-plane",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "8065301",
+      "name": "talk",
+      "font_class": "talk",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "8065302",
+      "name": "online-conference",
+      "font_class": "online-conference",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "8065303",
+      "name": "group",
+      "font_class": "group",
+      "unicode": "e62e",
+      "unicode_decimal": 58926
+    },
+    {
+      "icon_id": "8065304",
+      "name": "shield",
+      "font_class": "shield",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    }
+  ]
+}
