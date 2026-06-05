@@ -13,7 +13,8 @@ from src.icon_extractor import (
     load_icons_from_dir,
     sanitize_filename,
 )
-from src.ico_builder import DEFAULT_SIZES, build_ico, image_to_photoimage, preview_image
+from src.ico_builder import build_ico, image_to_photoimage, preview_image
+from src.svg_loader import load_svg_files, load_svgs_from_dir
 
 
 def _project_root() -> Path:
@@ -22,13 +23,17 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def _default_dirs() -> tuple[Path, Path]:
+def _default_dirs() -> tuple[Path, Path, Path]:
     if getattr(sys, "frozen", False):
         bundle = _project_root()
         exe_dir = Path(sys.executable).parent
-        return bundle / "ai_icon" / "font_6xww5b6c7bv", exe_dir / "output_icons"
+        return (
+            bundle / "ai_icon" / "font_6xww5b6c7bv",
+            exe_dir / "output_icons",
+            exe_dir / "svg",
+        )
     root = _project_root()
-    return root / "ai_icon" / "font_6xww5b6c7bv", root / "output_icons"
+    return root / "ai_icon" / "font_6xww5b6c7bv", root / "output_icons", root / "svg"
 
 
 def _app_icon_path() -> Path | None:
@@ -59,7 +64,7 @@ def _apply_window_icon(window: tk.Tk) -> None:
         pass
 
 
-DEFAULT_INPUT, DEFAULT_OUTPUT = _default_dirs()
+DEFAULT_ICONFONT_INPUT, DEFAULT_OUTPUT, DEFAULT_SVG_INPUT = _default_dirs()
 
 SIZE_OPTIONS = [
     (16, "16×16"),
@@ -72,7 +77,7 @@ SIZE_OPTIONS = [
 class IconfontToIcoApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("Iconfont → ICO 转换器")
+        self.title("Iconfont / SVG → ICO 转换器")
         _apply_window_icon(self)
         self.minsize(720, 520)
         self.geometry("900x600")
@@ -80,8 +85,10 @@ class IconfontToIcoApp(tk.Tk):
         self._icons: list[IconSvg] = []
         self._preview_photo: tk.PhotoImage | None = None
         self._exporting = False
+        self._svg_file_paths: list[Path] = []
 
-        self.input_dir = tk.StringVar(value=str(DEFAULT_INPUT))
+        self.input_mode = tk.StringVar(value="iconfont")
+        self.input_dir = tk.StringVar(value=str(DEFAULT_ICONFONT_INPUT))
         self.output_dir = tk.StringVar(value=str(DEFAULT_OUTPUT))
         self.background = tk.StringVar(value="white")
         self.size_vars = {size: tk.BooleanVar(value=True) for size, _ in SIZE_OPTIONS}
@@ -96,22 +103,47 @@ class IconfontToIcoApp(tk.Tk):
         paths = ttk.LabelFrame(main, text="路径", padding=8)
         paths.pack(fill=tk.X, pady=(0, 8))
 
-        ttk.Label(paths, text="输入目录 (iconfont.js + iconfont.json):").grid(
-            row=0, column=0, sticky=tk.W
-        )
-        ttk.Entry(paths, textvariable=self.input_dir, width=60).grid(
-            row=0, column=1, sticky=tk.EW, padx=6
-        )
-        ttk.Button(paths, text="浏览…", command=self._browse_input).grid(row=0, column=2)
+        mode_row = ttk.Frame(paths)
+        mode_row.grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 6))
+        ttk.Label(mode_row, text="输入模式:").pack(side=tk.LEFT)
+        ttk.Radiobutton(
+            mode_row,
+            text="Iconfont",
+            variable=self.input_mode,
+            value="iconfont",
+            command=self._on_mode_change,
+        ).pack(side=tk.LEFT, padx=(8, 4))
+        ttk.Radiobutton(
+            mode_row,
+            text="SVG",
+            variable=self.input_mode,
+            value="svg",
+            command=self._on_mode_change,
+        ).pack(side=tk.LEFT, padx=4)
 
-        ttk.Label(paths, text="输出目录:").grid(row=1, column=0, sticky=tk.W, pady=(6, 0))
+        self.input_label = ttk.Label(paths, text="输入目录 (iconfont.js + iconfont.json):")
+        self.input_label.grid(row=1, column=0, sticky=tk.W)
+        ttk.Entry(paths, textvariable=self.input_dir, width=60).grid(
+            row=1, column=1, sticky=tk.EW, padx=6
+        )
+        input_btns = ttk.Frame(paths)
+        input_btns.grid(row=1, column=2)
+        self.browse_dir_btn = ttk.Button(input_btns, text="浏览目录…", command=self._browse_input)
+        self.browse_dir_btn.pack(side=tk.LEFT)
+        self.browse_files_btn = ttk.Button(
+            input_btns, text="浏览文件…", command=self._browse_svg_files
+        )
+        self.browse_files_btn.pack(side=tk.LEFT, padx=(4, 0))
+
+        ttk.Label(paths, text="输出目录:").grid(row=2, column=0, sticky=tk.W, pady=(6, 0))
         ttk.Entry(paths, textvariable=self.output_dir, width=60).grid(
-            row=1, column=1, sticky=tk.EW, padx=6, pady=(6, 0)
+            row=2, column=1, sticky=tk.EW, padx=6, pady=(6, 0)
         )
         ttk.Button(paths, text="浏览…", command=self._browse_output).grid(
-            row=1, column=2, pady=(6, 0)
+            row=2, column=2, pady=(6, 0)
         )
         paths.columnconfigure(1, weight=1)
+        self._update_mode_ui()
 
         options = ttk.LabelFrame(main, text="导出选项", padding=8)
         options.pack(fill=tk.X, pady=(0, 8))
@@ -207,11 +239,51 @@ class IconfontToIcoApp(tk.Tk):
         self.log_text.see(tk.END)
         self.log_text.config(state=tk.DISABLED)
 
+    def _update_mode_ui(self) -> None:
+        is_svg = self.input_mode.get() == "svg"
+        if is_svg:
+            self.input_label.config(text="SVG 目录:")
+        else:
+            self.input_label.config(text="输入目录 (iconfont.js + iconfont.json):")
+        if is_svg:
+            self.browse_files_btn.state(["!disabled"])
+        else:
+            self.browse_files_btn.state(["disabled"])
+
+    def _on_mode_change(self) -> None:
+        current = Path(self.input_dir.get())
+        if self.input_mode.get() == "svg":
+            if current == DEFAULT_ICONFONT_INPUT or not current.is_dir():
+                self.input_dir.set(str(DEFAULT_SVG_INPUT))
+            self._svg_file_paths = []
+        else:
+            if current == DEFAULT_SVG_INPUT or self._svg_file_paths:
+                self.input_dir.set(str(DEFAULT_ICONFONT_INPUT))
+            self._svg_file_paths = []
+        self._update_mode_ui()
+        self._reload_icons()
+
     def _browse_input(self) -> None:
         path = filedialog.askdirectory(initialdir=self.input_dir.get())
         if path:
+            self._svg_file_paths = []
             self.input_dir.set(path)
             self._reload_icons()
+
+    def _browse_svg_files(self) -> None:
+        paths = filedialog.askopenfilenames(
+            title="选择 SVG 文件",
+            initialdir=self.input_dir.get(),
+            filetypes=[("SVG 文件", "*.svg"), ("所有文件", "*.*")],
+        )
+        if not paths:
+            return
+        self._svg_file_paths = [Path(p) for p in paths]
+        if len(self._svg_file_paths) == 1:
+            self.input_dir.set(str(self._svg_file_paths[0].parent))
+        else:
+            self.input_dir.set(f"({len(self._svg_file_paths)} 个文件)")
+        self._reload_icons()
 
     def _browse_output(self) -> None:
         path = filedialog.askdirectory(initialdir=self.output_dir.get())
@@ -219,9 +291,14 @@ class IconfontToIcoApp(tk.Tk):
             self.output_dir.set(path)
 
     def _reload_icons(self) -> None:
-        iconfont_dir = Path(self.input_dir.get())
         try:
-            icons, warnings = load_icons_from_dir(iconfont_dir)
+            if self.input_mode.get() == "svg":
+                if self._svg_file_paths:
+                    icons, warnings = load_svg_files(self._svg_file_paths)
+                else:
+                    icons, warnings = load_svgs_from_dir(Path(self.input_dir.get()))
+            else:
+                icons, warnings = load_icons_from_dir(Path(self.input_dir.get()))
         except (OSError, ValueError) as exc:
             self._icons = []
             self._checked = []
@@ -315,7 +392,10 @@ class IconfontToIcoApp(tk.Tk):
             return
 
         if not self._icons:
-            messagebox.showwarning("无图标", "请先加载有效的 iconfont 目录。")
+            if self.input_mode.get() == "svg":
+                messagebox.showwarning("无图标", "请先加载有效的 SVG 目录或文件。")
+            else:
+                messagebox.showwarning("无图标", "请先加载有效的 iconfont 目录。")
             return
 
         try:
